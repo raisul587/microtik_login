@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="theme-color" content="#000000" />
   
-<title>QR Code Scanner</title>
+<title>Mikrotik QR Login Scanner</title>
   <style>
     body{
       background-color: #000000;
@@ -65,17 +65,22 @@
         flex-direction: column;
         align-items: center;
         gap: 20px;
+        text-align: center;
     }
     #v {
-        width: 800px;
-        height: 600px;
+        width: 100%;
+        max-width: 800px;
+        height: auto;
         border: 1px solid #ccc;
     }
     #qr-canvas {
         display: none;
     }
     #result {
+        margin: 20px auto;
         padding: 10px;
+        max-width: 800px;
+        word-break: break-all;
         border: 1px solid #ccc;
         min-height: 30px;
     }
@@ -111,6 +116,7 @@
     <div>MIKHMON QR CODE SCANNER <br>Powered by <a href="http://www.webqr.com">webqr.com</a></div>
   </center>
 <canvas style="display:none;" id="qr-canvas" width="800" height="600"></canvas>
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script type="text/javascript">load();</script>
 </body>
 </html>

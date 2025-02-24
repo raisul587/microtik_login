@@ -360,25 +360,26 @@ function initCanvas(width, height) {
   gCtx = gCanvas.getContext("2d");
   gCtx.clearRect(0, 0, width, height);
 }
-function captureToCanvas() {
-  if (!gUM) return;
 
-  try {
-      if (v.readyState === v.HAVE_ENOUGH_DATA && v.videoWidth > 0) {
-          gCtx.drawImage(v, 0, 0, gCanvas.width, gCanvas.height);
-          try {
-              qrcode.decode();
-          } catch (e) {
-              console.log("QR decode error", e);
-              requestAnimationFrame(captureToCanvas);
-          }
-      } else {
-          requestAnimationFrame(captureToCanvas);
-      }
-  } catch (e) {
-      console.log("Capture error", e);
-      requestAnimationFrame(captureToCanvas);
-  }
+function captureToCanvas() {
+    if (!gUM) return;
+
+    try {
+        if (v.readyState === v.HAVE_ENOUGH_DATA && v.videoWidth > 0) {
+            gCtx.drawImage(v, 0, 0, gCanvas.width, gCanvas.height);
+            try {
+                qrcode.decode();
+            } catch (e) {
+                // Silent error - keep scanning
+                requestAnimationFrame(captureToCanvas);
+            }
+        } else {
+            requestAnimationFrame(captureToCanvas);
+        }
+    } catch (e) {
+        console.log("Capture error", e);
+        requestAnimationFrame(captureToCanvas);
+    }
 }
 
 function success(stream) {
@@ -392,17 +393,34 @@ function error(e) {
   console.log(e);
 }
 function load() {
-  if (isCanvasSupported()) {
-      initCanvas(800, 600);
-      qrcode.callback = function(result) {
-          document.getElementById("result").innerHTML = result;
-      };
-      document.getElementById("mainbody").style.display = "block";
-      setWebcam();
-  } else {
-      document.getElementById("mainbody").style.display = "none";
-      document.getElementById("noCanvas").style.display = "block";
-  }
+    if (isCanvasSupported()) {
+        initCanvas(800, 600);
+        qrcode.callback = function(result) {
+            console.log("QR Code detected:", result);
+            document.getElementById("result").innerHTML = result;
+            
+            // Check if the result is a Mikrotik login URL
+            if (result.includes('://') && (result.includes(':') || result.includes('@'))) {
+                try {
+                    // Parse the URL-like string
+                    let loginInfo = result.split('@');
+                    if (loginInfo.length === 2) {
+                        let credentials = loginInfo[0].split('://')[1].split(':');
+                        let server = loginInfo[1];
+                        
+                        console.log("Attempting Mikrotik login...");
+                        window.location.href = `http://${server}/login?username=${credentials[0]}&password=${credentials[1]}`;
+                    }
+                } catch (e) {
+                    console.error("Error parsing QR code:", e);
+                }
+            }
+        };
+        setWebcam();
+    } else {
+        document.getElementById("mainbody").style.display = "none";
+        document.getElementById("noCanvas").style.display = "block";
+    }
 }
 
 function setWebcam() {
